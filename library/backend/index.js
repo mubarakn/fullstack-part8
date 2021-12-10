@@ -110,12 +110,11 @@ const resolvers = {
       return author
     },
     addBook: async (root, args) => {
-      const book = new Book({
-        title: args.title,
-        published: args.published,
-        author: args.author,
-        genres: args.genres
-      })
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new AuthenticationError("not authenticated")
+      }
+      const book = new Book({ ...args })
       try {
         await book.save()
         await book.populate('author')
@@ -125,6 +124,10 @@ const resolvers = {
       return book
     },
     editAuthor: async (root, args) => {
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new AuthenticationError("not authenticated")
+      }
       const author = Author.findById(args.id)
       author.born = args.born
       try {
